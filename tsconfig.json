@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "ES2022",
+      "noImplicitAny": true,
+      "removeComments": false,
+      "preserveConstEnums": true,
+      "sourceMap": false,
+      "lib": ["ES2021", "DOM"],
+      "moduleResolution": "node",
+      "pretty": true,
+      "resolveJsonModule": true,
+    },
+}

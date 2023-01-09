@@ -1,0 +1,46 @@
+{ exec } from child_process
+{ readdir, stat } from fs
+import * as path from path
+
+
+civetDir := "./civet"
+compileDir := "./src"
+currentSubDir .= "/"
+
+handleFile := (pathh: string) -> {
+    t .= pathh.split("\\")
+    t.shift()
+    t.pop()
+    targetDir := t.join("/")
+
+    exec(`civet -c ${pathh} -o ${compileDir}/${targetDir}.ts`, (err,out) -> {
+        if(err) throw err
+    })
+}
+
+
+handleDir := (dir: string): void ->
+    console.log "Entering Sub Dir", dir
+    readDirF dir
+
+
+readDirF := (dir: string) -> {
+    readdir(dir, (err,files) -> {
+        files.forEach((file) -> 
+            pathh := path.join(dir, file)
+
+            stat(pathh, (err,stat) -> 
+                if(stat.isFile())
+                    handleFile file
+                else if (stat.isDirectory())
+                    handleDir file
+            )
+
+        )
+    
+    })
+}
+
+
+
+readDirF(civetDir)
