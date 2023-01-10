@@ -5,11 +5,13 @@ var civet_1 = require("@danielx/civet");
 var path = require("path");
 var civetDir = process.argv[2];
 var compileDir = process.argv[3];
-console.log(civetDir, compileDir);
 if (!civetDir || !compileDir) {
     console.log("Expected usage `node ctr.js ./path/to/civet ./path/to/output`");
     process.exit(1);
 }
+compileDir.replaceAll("\\", "/");
+civetDir.replaceAll("\\", "/");
+console.log(civetDir, compileDir);
 //probably better way to do this but idk
 if (civetDir.startsWith("./")) {
     civetDir = civetDir.slice(2, civetDir.length);
@@ -25,7 +27,7 @@ if (compileDir.startsWith("/")) {
 }
 var currentSubDir = "/";
 function handleFile(pathh) {
-    var t = pathh.split("\\");
+    var t = pathh.split("/");
     t.shift();
     t.pop();
     var targetDir = t.join("/");
@@ -33,7 +35,7 @@ function handleFile(pathh) {
         console.log("Contents ".concat(contents));
         contents = contents.replace(".civet", "");
         console.log("New Contents ".concat(contents));
-        var x = pathh.split("\\");
+        var x = pathh.split("/");
         var fileName = x.pop().split(".")[0];
         var compiled = (0, civet_1.compile)(contents);
         var p = x.join("/");
@@ -56,7 +58,7 @@ function handleDir(dir) {
 function readDirF(dir) {
     return (0, fs_1.readdir)(dir, function (err, files) {
         return files.forEach(function (file) {
-            var pathh = path.join(dir, file);
+            var pathh = path.join(dir, file).replaceAll("\\", "/");
             return (0, fs_1.stat)(pathh, function (err, stat) {
                 if (stat.isFile()) {
                     return handleFile(pathh);

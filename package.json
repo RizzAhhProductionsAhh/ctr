@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build": "civet -c ctr.civet -o ctr.ts && tsc ctr.ts"
+  },
   "dependencies": {
     "@danielx/civet": "^0.5.33",
     "@types/node": "^18.11.18"

@@ -6,13 +6,17 @@ import * as path from path
 
 civetDir .= process.argv[2] as string
 compileDir .= process.argv[3] as string
-console.log civetDir , compileDir
 
 if(!civetDir or !compileDir) {
     console.log "Expected usage `node ctr.js ./path/to/civet ./path/to/output`";
     process.exit 1;
 }
 
+compileDir.replaceAll("\\", "/")
+civetDir.replaceAll("\\", "/")
+
+
+console.log civetDir , compileDir
 //probably better way to do this but idk
 if(civetDir.startsWith("./")) {
     civetDir = civetDir.slice(2, civetDir.length)
@@ -30,7 +34,7 @@ if(compileDir.startsWith("/")) {
 currentSubDir .= "/"
 
 handleFile := (pathh: string) -> {
-    t .= pathh.split("\\")
+    t .= pathh.split("/")
     t.shift()
     t.pop()
     targetDir := t.join("/")
@@ -39,7 +43,7 @@ handleFile := (pathh: string) -> {
         console.log `Contents ${contents}`
         contents = contents.replace(".civet", "")
         console.log `New Contents ${contents}`
-        x := pathh.split("\\")
+        x := pathh.split("/")
         fileName := x.pop().split(".")[0]
 
 
@@ -68,7 +72,7 @@ handleDir := (dir: string): void ->
 readDirF := (dir: string) -> {
     readdir(dir, (err,files) -> {
         files.forEach((file) -> 
-            pathh := path.join(dir, file)
+            pathh := path.join(dir, file).replaceAll("\\", "/")
 
             stat(pathh, (err,stat) -> 
                 if(stat.isFile())
