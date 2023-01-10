@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@danielx/civet": "^0.5.33",
     "@types/node": "^18.11.18"
   }
 }

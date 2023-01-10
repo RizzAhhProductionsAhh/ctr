@@ -1,53 +1,72 @@
-import { exec } from "child_process"
-import { readdir, stat } from "fs"
-import * as path from "path"
-
-
-const civetDir = "./civet"
-const compileDir = "./src"
-let currentSubDir = "/"
-
-function handleFile (pathh) {
-    let t = pathh.split("\\")
-    t.shift()
-    t.pop()
-    const targetDir = t.join("/")
-
-    return exec(`civet -c ${pathh} -o ${compileDir}/${targetDir}.ts`, function(err,out) {
-        if(err) throw err
-        return
-    })
+"use strict";
+exports.__esModule = true;
+var fs_1 = require("fs");
+var civet_1 = require("@danielx/civet");
+var path = require("path");
+var civetDir = process.argv[2];
+var compileDir = process.argv[3];
+console.log(civetDir, compileDir);
+if (!civetDir || !compileDir) {
+    console.log("Expected usage `node ctr.js ./path/to/civet ./path/to/output`");
+    process.exit(1);
 }
-
-
-function handleDir (dir) {
-    console.log("Entering Sub Dir", dir)
-    readDirF(dir)
+//probably better way to do this but idk
+if (civetDir.startsWith("./")) {
+    civetDir = civetDir.slice(2, civetDir.length);
 }
-
-
-function readDirF (dir) {
-    return readdir(dir, function(err,files) {
-        return files.forEach(function(file) { 
-            const pathh = path.join(dir, file)
-
-            return stat(pathh, function(err,stat) { 
-                if(stat.isFile()) {
-                    return handleFile(file)
+if (civetDir.startsWith("/")) {
+    civetDir = civetDir.slice(1, civetDir.length);
+}
+if (compileDir.startsWith("./")) {
+    compileDir = compileDir.slice(2, compileDir.length);
+}
+if (compileDir.startsWith("/")) {
+    compileDir = compileDir.slice(1, compileDir.length);
+}
+var currentSubDir = "/";
+function handleFile(pathh) {
+    var t = pathh.split("\\");
+    t.shift();
+    t.pop();
+    var targetDir = t.join("/");
+    return (0, fs_1.readFile)(pathh, 'utf8', function (err, contents) {
+        console.log("Contents ".concat(contents));
+        contents = contents.replace(".civet", "");
+        console.log("New Contents ".concat(contents));
+        var x = pathh.split("\\");
+        var fileName = x.pop().split(".")[0];
+        var compiled = (0, civet_1.compile)(contents);
+        var p = x.join("/");
+        console.log(p);
+        p = p.replace(civetDir, compileDir);
+        console.log(p);
+        if (!(0, fs_1.existsSync)(p))
+            (0, fs_1.mkdirSync)(p);
+        return (0, fs_1.writeFile)(x.join("/").replace(civetDir, compileDir) + "/".concat(fileName, ".ts"), compiled, function (err) {
+            if (err)
+                throw err;
+            return;
+        });
+    });
+}
+function handleDir(dir) {
+    console.log("Entering Sub Dir", dir);
+    readDirF(dir);
+}
+function readDirF(dir) {
+    return (0, fs_1.readdir)(dir, function (err, files) {
+        return files.forEach(function (file) {
+            var pathh = path.join(dir, file);
+            return (0, fs_1.stat)(pathh, function (err, stat) {
+                if (stat.isFile()) {
+                    return handleFile(pathh);
                 }
                 else if (stat.isDirectory()) {
-                    return handleDir(file)
+                    return handleDir(pathh);
                 }
- return
-            }
-            )
-        }
-
-        )
-    
-    })
+                return;
+            });
+        });
+    });
 }
-
-
-
-readDirF(civetDir)
+readDirF(civetDir);

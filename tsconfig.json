@@ -1,14 +1,19 @@
 {
+  "ts-node": {
+    "experimentalSpecifierResolution": "node"
+  },
     "compilerOptions": {
-      "module": "commonjs",
+      "moduleDetection": "force",
+      "module": "CommonJS",
       "target": "ES2022",
       "noImplicitAny": true,
       "removeComments": false,
       "preserveConstEnums": true,
-      "sourceMap": false,
+      "sourceMap": true,
       "lib": ["ES2021", "DOM"],
       "moduleResolution": "node",
       "pretty": true,
       "resolveJsonModule": true,
+      "jsx": "react"
     },
 }
