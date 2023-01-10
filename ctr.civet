@@ -12,8 +12,8 @@ if(!civetDir or !compileDir) {
     process.exit 1;
 }
 
-compileDir.replaceAll("\\", "/")
-civetDir.replaceAll("\\", "/")
+compileDir = compileDir.replaceAll("\\", "/")
+civetDir = civetDir.replaceAll("\\", "/")
 
 
 console.log civetDir , compileDir
@@ -56,7 +56,9 @@ handleFile := (pathh: string) -> {
 
         if(!existsSync(p)) mkdirSync(p)
 
-        writeFile(x.join("/").replace(civetDir, compileDir) + `/${fileName}.ts`, compiled, (err) -> {
+        console.log "Outputting", pathh, "to", p
+
+        writeFile(p + `/${fileName}.ts`, compiled, (err) -> {
             if(err) throw err
             
         })

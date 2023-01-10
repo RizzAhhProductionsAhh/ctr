@@ -9,8 +9,8 @@ if (!civetDir || !compileDir) {
     console.log("Expected usage `node ctr.js ./path/to/civet ./path/to/output`");
     process.exit(1);
 }
-compileDir.replaceAll("\\", "/");
-civetDir.replaceAll("\\", "/");
+compileDir = compileDir.replaceAll("\\", "/");
+civetDir = civetDir.replaceAll("\\", "/");
 console.log(civetDir, compileDir);
 //probably better way to do this but idk
 if (civetDir.startsWith("./")) {
@@ -44,7 +44,8 @@ function handleFile(pathh) {
         console.log(p);
         if (!(0, fs_1.existsSync)(p))
             (0, fs_1.mkdirSync)(p);
-        return (0, fs_1.writeFile)(x.join("/").replace(civetDir, compileDir) + "/".concat(fileName, ".ts"), compiled, function (err) {
+        console.log("Outputting", pathh, "to", p);
+        return (0, fs_1.writeFile)(p + "/".concat(fileName, ".ts"), compiled, function (err) {
             if (err)
                 throw err;
             return;
