@@ -1,0 +1,126 @@
+#!/usr/bin/env node
+
+{ exec } from child_process
+{ readdirSync, readdir, statSync, readFile, writeFile, unlink, existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync, rmdirSync } from fs
+{compile} from "@danielx/civet"
+import * as path from path
+
+if(!existsSync("./ctr.json")) writeFileSync("./ctr.json", JSON.stringify({}))
+jsonData := JSON.parse(readFileSync("./ctr.json" , {encoding: 'utf8'}))
+
+civetDir .= process.argv[2] as string
+compileDir .= process.argv[3] as string
+
+if(!civetDir or !compileDir) {
+    console.log "Expected usage `node ctr.js ./path/to/civet ./path/to/output`";
+    process.exit 1;
+}
+
+compileDir = compileDir.replaceAll("\\", "/")
+civetDir = civetDir.replaceAll("\\", "/")
+
+
+console.log civetDir , compileDir
+//probably better way to do this but idk
+if(civetDir.startsWith("./")) {
+    civetDir = civetDir.slice(2, civetDir.length)
+}
+if(civetDir.startsWith("/")) {
+    civetDir = civetDir.slice(1, civetDir.length)
+}
+if(compileDir.startsWith("./")) {
+    compileDir = compileDir.slice(2, compileDir.length)
+}
+if(compileDir.startsWith("/")) {
+    compileDir = compileDir.slice(1, compileDir.length)
+}
+
+
+oldCivetD: {dirs: string[], files: string[]} .=  {dirs: [], files :[]}
+
+if(jsonData[civetDir] && jsonData[civetDir][compileDir]) oldCivetD = jsonData[civetDir][compileDir]
+
+//oldCivetD: {dirs: string[], files: string[]} .= jsonData[civetDir][compileDir] || {dirs:[], files: []}
+newCivetD: {dirs: string[], files: string[]} .= {dirs: [], files: []}
+
+currentSubDir .= "/"
+
+handleFile := (pathh: string) -> {
+    newCivetD.files.push(pathh)
+    t .= pathh.split("/")
+    t.shift()
+    t.pop()
+    targetDir := t.join("/")
+
+    contents .= readFileSync(pathh, {encoding: 'utf8'}) 
+    contents = contents.replace(".civet", "")
+    x := pathh.split("/")
+    fileName := x.pop().split(".")[0]
+
+
+    compiled := compile(contents)
+
+    p .= x.join("/")
+    p = p.replace(civetDir, compileDir)
+
+    if(!existsSync(p)) mkdirSync(p)
+
+    console.log "Outputting", pathh, "to", p
+
+    writeFile(p + `/${fileName}.ts`, compiled, (err) -> {
+        if(err) throw err       
+    })
+}
+
+
+handleDir := (dir: string): void ->
+    newCivetD.dirs.push(dir)
+    readDirF dir, false
+
+
+readDirF := (dir: string, x: boolean) -> {
+    files := readdirSync(dir)
+
+    for(i .= 0; i < files.length; i++) {
+        file := files[i]
+        pathh := path.join(dir, file).replaceAll("\\", "/")
+
+        stat := statSync(pathh)
+        if stat.isFile()
+            handleFile pathh
+        else if stat.isDirectory()
+            handleDir pathh
+    }
+}
+
+readDirF(civetDir, true)
+
+
+
+oldCivetD.files.forEach((file: string) -> {
+    if(!newCivetD.files.includes(file)) {
+        rep .= file.replace(civetDir,compileDir).replace(".civet", ".ts")
+
+        if(existsSync(rep)) {
+            unlinkSync(rep)
+            console.log `Deleted file ${rep}`
+        }
+    }
+})
+
+oldCivetD.dirs.forEach((dir: string) -> {
+    if(!newCivetD.dirs.includes(dir)) {
+        rep .= dir.replace(civetDir, compileDir)
+        if(existsSync(rep)) {
+            rmdirSync(rep)
+            console.log `Deleted dir ${rep}`
+        }
+    }
+})
+
+jsonData[civetDir] = {[compileDir]: {}}
+jsonData[civetDir][compileDir] = newCivetD
+
+writeFileSync("./ctr.json", JSON.stringify(jsonData))
+
+

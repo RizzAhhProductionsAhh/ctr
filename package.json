@@ -1,6 +1,12 @@
 {
+  "name": "@shagos/ctr",
+  "version": "1.1.0",
+  "main":"index.js",
+  "bin": {
+    "ctr": "./cli.js"
+  },
   "scripts": {
-    "build": "civet -c ctr.civet -o ctr.ts && tsc ctr.ts"
+    "build": "civet -c cli.civet -o cli.ts && tsc cli.ts"
   },
   "dependencies": {
     "@danielx/civet": "^0.5.33",
